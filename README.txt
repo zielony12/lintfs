@@ -5,7 +5,8 @@ writing.
 
 In order to run this on real hardware you'd want to modify the kernel config
 so it detects your disk. Place it in res/ right before recompiling tha shit
-cause the Makefile script replaces linux/.config with it.
+cause the Makefile script replaces linux/.config with it. The same applies to
+busybox.
 
 Build: `make`
 Test : `make test`
