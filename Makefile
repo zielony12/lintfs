@@ -4,9 +4,9 @@ SHELL := /bin/bash
 
 .SILENT: download_toolchain
 .PHONY: all rebuild clean clean_linux clean_busybox
-all: get_linux compile_linux download_toolchain get_musl compile_musl get_busybox compile_busybox get_ntfs3g compile_ntfs3g make_initramfs make_dist
-rebuild: compile_linux compile_musl compile_busybox compile_ntfs3g make_initramfs make_dist
-cleanbuild: clean compile_linux compile_musl compile_busybox compile_ntfs3g make_initramfs make_dist
+all: get_linux compile_linux download_toolchain get_musl compile_musl get_busybox compile_busybox install_musl get_ntfs3g compile_ntfs3g make_initramfs make_dist
+rebuild: compile_linux compile_musl compile_busybox install_musl compile_ntfs3g make_initramfs make_dist
+cleanbuild: clean compile_linux compile_musl compile_busybox install_musl compile_ntfs3g make_initramfs make_dist
 
 get_linux:
 ifneq ($(wildcard linux),)
@@ -36,7 +36,9 @@ compile_musl:
 	cd musl; \
 	CC=../i686-linux-musl-cross/bin/i686-linux-musl-gcc ./configure --prefix=../busybox/_install/usr/
 	$(MAKE) CROSS_COMPILE=../i686-linux-musl-cross/bin/i686-linux-musl- -C musl -j $(CORES)
-	$(MAKE) -C musl install
+
+install_musl:	
+	$(MAKE) -C musl install 2>/dev/null || true
 
 get_busybox:
 ifneq ($(wildcard busybox),)
@@ -63,7 +65,7 @@ compile_busybox:
 compile_ntfs3g:
 	cd ntfs-3g; \
 	./autogen.sh; \
-	CC=/home/karol/Documents/linux_ntfs/i686-linux-musl-cross/bin/i686-linux-musl-gcc ./configure --host=i686-linux-musl --prefix=/home/karol/Documents/linux_ntfs/busybox/_install/usr/ --exec-prefix=/home/karol/Documents/busybox/_install/usr/
+	CC=/home/karol/git/lintfs/i686-linux-musl-cross/bin/i686-linux-musl-gcc ./configure --host=i686-linux-musl --prefix=/home/karol/git/lintfs/busybox/_install/usr/ --exec-prefix=/home/karol/git/lintfs/busybox/_install/usr/
 	$(MAKE) -C ntfs-3g -j $(CORES)
 	#$(MAKE) -C ntfs-3g install
 	cp ntfs-3g/libntfs-3g/.libs/* busybox/_install/usr/lib/
@@ -115,10 +117,10 @@ clean_busybox:
 	$(MAKE) -C busybox clean
 
 clean_dist:
-	rm dist.img
+	rm -rf dist.img
 
 reset: clean_dist
-	rM -R linux busybox i686-linux-musl-cross i686-linux-musl-cross.tgz
+	rm -rf LINUX busybox i686-linux-musl-cross i686-linux-musl-cross.tgz initramfs.cpio.gz initramfs ntfs-3g musl
 
 test:
 	qemu-system-x86_64 -drive file=dist.img,if=virtio -m 1G
