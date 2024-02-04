@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "-- Welcome --"
+
+for s in `ls /etc/init.d | grep -wv "rcS"`
+do
+	if [ s = "rcS" ]
+	then
+		exit 0
+	fi
+	. /etc/init.d/$s
+done

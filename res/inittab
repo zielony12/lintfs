@@ -1,0 +1,6 @@
+::sysinit:/etc/init.d/rcS
+::restart:/sbin/init
+::ctrlaltdel:/sbin/reboot
+::shutdown:/bin/umount -a -r
+::askfirst:-/bin/sh
+#tty2::respawn:/sbin/getty 38400 tty3
