@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "-- Welcome --"
+echo "starting init.d scripts..."
 
 for s in `ls /etc/init.d | grep -wv "rcS"`
 do

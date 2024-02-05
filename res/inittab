@@ -3,4 +3,7 @@
 ::ctrlaltdel:/sbin/reboot
 ::shutdown:/bin/umount -a -r
 ::askfirst:-/bin/sh
-#tty2::respawn:/sbin/getty 38400 tty3
+tty2::respawn:/bin/sh
+tty3::respawn:/bin/sh
+tty4::respawn:/bin/sh
+tty5::respawn:/bin/sh

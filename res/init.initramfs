@@ -8,8 +8,4 @@ echo "initramfs: mount"
 
 /bin/mount /new_root
 
-mount -t proc none /new_root/proc
-mount -t sysfs none /new_root/sys
-mount -t devtmpfs none /new_root/dev
-
-exec /sbin/switch_root /new_root /bin/sh
+exec /sbin/switch_root /new_root /sbin/init

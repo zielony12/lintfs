@@ -1,12 +1,14 @@
 LiNTFS (Linux x NTFS) V1.0
 
-TODO: ntfs-3g both for initramfs and rootfs so it can handle reading and
-writing.
+TODO: build ntfsprogs for initramfs. This will need shared libc, so I will
+most likely make busybox shared aswell.
 
 In order to run this on real hardware you'd want to modify the kernel config
-so it detects your disk. Place it in res/ right before recompiling tha shit
-cause the Makefile script replaces linux/.config with it. The same applies to
-busybox.
+so it detects your disk.
+
+The build scripts replaces busybox/.config and linux/.config with
+res/linux.cfg and res/busybox.cfg (or res/busybox.initramfs.cfg for
+initramfs' busybox) respectively.
 
 Build: `make`
 Test : `make test`

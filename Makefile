@@ -1,6 +1,7 @@
 CORES := $(shell nproc)
 BASE := $(shell pwd)
 SHELL := /bin/bash
+NTFS_3G ?= 0
 
 .SILENT: download_toolchain
 .PHONY: all rebuild clean clean_linux clean_busybox
@@ -48,10 +49,12 @@ else
 endif
 
 get_ntfs3g:
+ifeq ($(NTFS_3G), 1)
 ifneq ($(wildcard ntfs-3g),)
 	cd ntfs-3g && git pull
 else
 	git clone https://github.com/tuxera/ntfs-3g.git ntfs-3g
+endif
 endif
 
 compile_busybox:
@@ -63,6 +66,7 @@ compile_busybox:
 	$(MAKE) arch=x86 -C busybox install
 
 compile_ntfs3g:
+ifeq ($(NTFS_3G), 1)
 	cd ntfs-3g; \
 	./autogen.sh; \
 	CC=/home/karol/git/lintfs/i686-linux-musl-cross/bin/i686-linux-musl-gcc ./configure --host=i686-linux-musl --prefix=/home/karol/git/lintfs/busybox/_install/usr/ --exec-prefix=/home/karol/git/lintfs/busybox/_install/usr/
@@ -72,12 +76,13 @@ compile_ntfs3g:
 	cp ntfs-3g/ntfsprogs/.libs/* busybox/_install/usr/sbin/
 	#cp ntfs-3g/libntfs-3g/.libs/* busybox/_initramfs/usr/lib/
 	#cp ntfs-3g/ntfsprogs/.libs/* busybox/_initramfs/usr/sbin/
+endif
 
 make_initramfs:
 	cp -r busybox/_initramfs initramfs
 	mkdir -p initramfs/{etc,dev,tmp,sys,proc,new_root}
-	cp res/fstab initramfs/etc/fstab
 	cp res/init.initramfs initramfs/init
+	cp res/fstab.initramfs initramfs/etc/fstab
 	chmod +x initramfs/init
 	cd initramfs; find . | cpio --owner +0:+0 -H newc -o | gzip > ../initramfs.cpio.gz
 

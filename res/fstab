@@ -1,1 +1,0 @@
-/dev/vda1 /new_root ntfs rw,fmask=0022,dmask=0000 0 0
