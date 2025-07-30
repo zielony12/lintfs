@@ -1,8 +1,10 @@
 #!/bin/sh
 
-mount -t proc none /proc
-mount -t sysfs none /sys
-mount -t devtmpfs none /dev
+mount -t tmpfs tmpfs /tmp
+mount -t proc proc /proc
+mount -t sysfs sys /sys
+#devtmpfs is being mounted automatically
+#mount -t devtmpfs none /dev
 
 echo "initramfs: mount"
 

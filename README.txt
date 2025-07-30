@@ -14,7 +14,12 @@ Build: `make`
 Test : `make test`
 Clean: `make clean`
 
-No license - do what you want.
+ntfs-3g is just for ntfsprogs (NTFS_3G=0|1 make flag)
+ntfs3 kernel driver is used for NTFS support so initramfs is not required,
+however can be enabled (INITRAMFS=0|1 make flag)
+
+
+No license - do whatever you want.
 
 _________
 zielony12

@@ -1,6 +1,7 @@
 #!/bin/sh
 
-mount -t proc none /proc
-mount -t devtmpfs none /dev
-mount -t sysfs none /sys
-mount -t tmpfs none /tmp
+mount -t proc proc /proc
+#devtmpfs mounts automatically anyways
+#mount -t devtmpfs dev /dev
+mount -t sysfs sys /sys
+mount -t tmpfs tmpfs /tmp

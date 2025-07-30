@@ -2,6 +2,7 @@ CORES := $(shell nproc)
 BASE := $(shell pwd)
 SHELL := /bin/bash
 NTFS_3G ?= 0
+INITRAMFS ?= 0
 SUDO ?= sudo
 
 .SILENT: download_toolchain
@@ -62,15 +63,17 @@ compile_busybox:
 	cp res/busybox.cfg busybox/.config
 	$(MAKE) arch=x86 -C busybox -j $(CORES)
 	$(MAKE) arch=x86 -C busybox install
+ifeq ($(INITRAMFS), 1)
 	cp res/busybox.initramfs.cfg busybox/.config
 	$(MAKE) arch=x86 -C busybox -j $(CORES)
 	$(MAKE) arch=x86 -C busybox install
+endif
 
 compile_ntfs3g:
 ifeq ($(NTFS_3G), 1)
 	cd ntfs-3g; \
 	./autogen.sh; \
-	CC=/home/karol/git/lintfs/i686-linux-musl-cross/bin/i686-linux-musl-gcc ./configure --host=i686-linux-musl --prefix=/home/karol/git/lintfs/busybox/_install/usr/ --exec-prefix=/home/karol/git/lintfs/busybox/_install/usr/
+	CC=$(PWD)/i686-linux-musl-cross/bin/i686-linux-musl-gcc ./configure --host=i686-linux-musl --prefix=$(PWD)/busybox/_install/usr/ --exec-prefix=$(PWD)/busybox/_install/usr/
 	$(MAKE) -C ntfs-3g -j $(CORES)
 	#$(MAKE) -C ntfs-3g install
 	cp ntfs-3g/libntfs-3g/.libs/* busybox/_install/usr/lib/
@@ -80,18 +83,20 @@ ifeq ($(NTFS_3G), 1)
 endif
 
 make_initramfs:
+ifeq ($(INITRAMFS), 1)
 	cp -r busybox/_initramfs initramfs
 	mkdir -p initramfs/{etc,dev,tmp,sys,proc,new_root}
 	cp res/init.initramfs initramfs/init
 	cp res/fstab.initramfs initramfs/etc/fstab
 	chmod +x initramfs/init
 	cd initramfs; find . | cpio --owner +0:+0 -H newc -o | gzip > ../initramfs.cpio.gz
+endif
 
 make_dist:
 	dd if=/dev/zero of=dist.img bs=1k count=512k
 	parted -s dist.img mklabel msdos mkpart primary ext4 0 512
 	parted -s dist.img set 1 boot on
-	doas losetup -P /dev/loop69 dist.img
+	$(SUDO) losetup -P /dev/loop69 dist.img
 	$(SUDO) mkntfs /dev/loop69p1
 	$(SUDO) mount /dev/loop69p1 /mnt
 	$(SUDO) chown $(USER):$(USER) /mnt
@@ -103,10 +108,14 @@ make_dist:
 	cp res/init.d/* /mnt/etc/init.d/
 	chmod +x /mnt/etc/init.d/* 
 	cp linux/arch/x86/boot/bzImage /mnt/boot/
+ifeq ($(INITRAMFS), 1)
 	cp initramfs.cpio.gz /mnt/boot/
+	cp res/syslinux.cfg.initramfs /mnt/boot/syslinux/syslinux.cfg
+else
 	cp res/syslinux.cfg /mnt/boot/syslinux/
+endif
 	$(SUDO) chown -R root:root /mnt
-	$(SUDO) extlinux -i /mnt
+	$(SUDO) extlinux -i /mnt/boot
 	sync
 	$(SUDO) umount /mnt
 	$(SUDO) losetup -d /dev/loop69
@@ -129,4 +138,4 @@ reset: clean_dist
 	rm -rf LINUX busybox i686-linux-musl-cross i686-linux-musl-cross.tgz initramfs.cpio.gz initramfs ntfs-3g musl
 
 test:
-	qemu-system-x86_64 -drive file=dist.img,if=virtio -m 1G
+	qemu-system-i386 -drive file=dist.img,if=virtio -m 1G
