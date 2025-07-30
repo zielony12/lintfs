@@ -2,6 +2,7 @@ CORES := $(shell nproc)
 BASE := $(shell pwd)
 SHELL := /bin/bash
 NTFS_3G ?= 0
+SUDO ?= sudo
 
 .SILENT: download_toolchain
 .PHONY: all rebuild clean clean_linux clean_busybox
@@ -91,9 +92,9 @@ make_dist:
 	parted -s dist.img mklabel msdos mkpart primary ext4 0 512
 	parted -s dist.img set 1 boot on
 	doas losetup -P /dev/loop69 dist.img
-	doas mkntfs /dev/loop69p1
-	doas mount /dev/loop69p1 /mnt
-	doas chown karol:karol /mnt
+	$(SUDO) mkntfs /dev/loop69p1
+	$(SUDO) mount /dev/loop69p1 /mnt
+	$(SUDO) chown $(USER):$(USER) /mnt
 	mkdir -p /mnt/{etc,boot/syslinux,dev,tmp,sys,proc,lib}
 	cp -r busybox/_install/* /mnt/
 	cp /mnt/usr/lib/libc.so /mnt/lib/ld-musl-i386.so.1
@@ -104,11 +105,11 @@ make_dist:
 	cp linux/arch/x86/boot/bzImage /mnt/boot/
 	cp initramfs.cpio.gz /mnt/boot/
 	cp res/syslinux.cfg /mnt/boot/syslinux/
-	doas chown -R root:root /mnt
-	doas extlinux -i /mnt
+	$(SUDO) chown -R root:root /mnt
+	$(SUDO) extlinux -i /mnt
 	sync
-	doas umount /mnt
-	doas losetup -d /dev/loop69
+	$(SUDO) umount /mnt
+	$(SUDO) losetup -d /dev/loop69
 
 clean: clean_linux clean_musl clean_busybox clean_dist
 
