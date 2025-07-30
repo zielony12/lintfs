@@ -100,7 +100,7 @@ make_dist:
 	$(SUDO) mkntfs /dev/loop69p1
 	$(SUDO) mount /dev/loop69p1 /mnt
 	$(SUDO) chown $(USER):$(USER) /mnt
-	mkdir -p /mnt/{etc,boot/syslinux,dev,tmp,sys,proc,lib}
+	mkdir -p /mnt/{etc,boot,dev,tmp,sys,proc,lib}
 	cp -r busybox/_install/* /mnt/
 	cp /mnt/usr/lib/libc.so /mnt/lib/ld-musl-i386.so.1
 	cp res/inittab /mnt/etc/inittab
@@ -110,9 +110,9 @@ make_dist:
 	cp linux/arch/x86/boot/bzImage /mnt/boot/
 ifeq ($(INITRAMFS), 1)
 	cp initramfs.cpio.gz /mnt/boot/
-	cp res/syslinux.cfg.initramfs /mnt/boot/syslinux/syslinux.cfg
+	cp res/syslinux.cfg.initramfs /mnt/boot/syslinux.cfg
 else
-	cp res/syslinux.cfg /mnt/boot/syslinux/
+	cp res/syslinux.cfg /mnt/boot/
 endif
 	$(SUDO) chown -R root:root /mnt
 	$(SUDO) extlinux -i /mnt/boot
